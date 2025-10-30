@@ -1,6 +1,5 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
 import {
   History,
   TrendingUp,
@@ -14,8 +13,8 @@ import {
   Library,
   HelpCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/contexts/app-context";
+import { cn } from "@/lib/utils";
 import AppHeader from "@/components/core/app-header";
 import NavPanel from "@/components/panels/nav-panel";
 import GitHubSearchPanel from "@/components/panels/github-search-panel";
@@ -77,34 +76,23 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-background text-foreground">
-      {/* Mobile Menu Toggle Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleMobileMenu}
-        className="fixed top-4 left-4 z-50 md:hidden"
+      {/* Navigation Panel - Desktop: visible, Mobile: hidden by default */}
+      <aside 
+        className={cn(
+          "w-[280px] flex-shrink-0 fixed md:static h-full z-50 transition-transform duration-300 ease-in-out",
+          "md:translate-x-0",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}
       >
-        {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </Button>
-
-      {/* Navigation Panel - Desktop */}
-      <aside className="hidden md:block w-[280px] flex-shrink-0">
         <NavPanel />
       </aside>
 
-      {/* Navigation Panel - Mobile (Overlay) */}
+      {/* Backdrop overlay for mobile when menu is open */}
       {isMobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
-            onClick={toggleMobileMenu}
-          />
-          {/* Panel */}
-          <aside className="fixed left-0 top-0 h-full w-[280px] z-50 md:hidden">
-            <NavPanel />
-          </aside>
-        </>
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={toggleMobileMenu}
+        />
       )}
 
       {/* Main content area */}

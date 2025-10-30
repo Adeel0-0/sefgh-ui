@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Download, Share2, Github, Ghost, User, Sun, Moon, Monitor } from "lucide-react";
+import { ChevronDown, Download, Share2, Github, Ghost, User, Sun, Moon, Monitor, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 export default function AppHeader() {
   const { theme, setTheme } = useTheme();
-  const { toggleSearchPanel, isPrivateMode, togglePrivateMode } = useAppContext();
+  const { toggleSearchPanel, isPrivateMode, togglePrivateMode, toggleMobileMenu } = useAppContext();
 
   const handleExport = (format) => {
     alert(`Export as ${format} - Not yet implemented`);
@@ -33,6 +33,16 @@ export default function AppHeader() {
     <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between flex-shrink-0">
       {/* Left side - Logo/Title and Version */}
       <div className="flex items-center gap-3">
+        {/* Hamburger Menu - Mobile Only */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMobileMenu}
+          className="md:hidden"
+          title="Toggle Navigation"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
         <h1 className="text-2xl font-bold">SEFGH</h1>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
