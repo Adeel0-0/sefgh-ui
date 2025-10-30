@@ -2,16 +2,21 @@
 
 import { ThemeProvider } from "./theme-provider";
 import { AppProvider } from "@/contexts/app-context";
+import { AuthProvider } from "@/contexts/auth-context";
 import { ToastProvider } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export function RootProviders({ children }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <AppProvider>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
-      </AppProvider>
+      <AuthProvider>
+        <AppProvider>
+          <ToastProvider>
+            {children}
+            <Toaster />
+          </ToastProvider>
+        </AppProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
