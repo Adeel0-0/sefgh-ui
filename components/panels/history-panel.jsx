@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Pencil, Trash2, MessageSquare } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, Pencil, Trash2, MessageSquare, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ChatService from "@/services/chat-service";
@@ -52,6 +52,9 @@ export default function HistoryPanel() {
   const [sessions, setSessions] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredSessionId, setHoveredSessionId] = useState(null);
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const editInputRef = useRef(null);
   const { loadSession, activeSession } = useAppContext();
 
   // Load sessions on mount
@@ -76,21 +79,52 @@ export default function HistoryPanel() {
   // Group filtered sessions by time
   const groupedSessions = groupSessionsByTime(filteredSessions);
 
+  // Focus input when editing starts
+  useEffect(() => {
+    if (editingSessionId && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingSessionId]);
+
   const handleSessionClick = (sessionId) => {
+    if (editingSessionId) return; // Don't navigate if editing
     loadSession(sessionId);
   };
 
-  const handleRename = (e, sessionId, currentTitle) => {
+  const handleStartRename = (e, sessionId, currentTitle) => {
     e.stopPropagation();
-    const newTitle = prompt("Enter new title:", currentTitle);
-    if (newTitle && newTitle.trim()) {
-      ChatService.updateSessionTitle(sessionId, newTitle.trim());
+    setEditingSessionId(sessionId);
+    setEditingTitle(currentTitle);
+  };
+
+  const handleCancelRename = (e) => {
+    e.stopPropagation();
+    setEditingSessionId(null);
+    setEditingTitle("");
+  };
+
+  const handleSaveRename = (e, sessionId) => {
+    e.stopPropagation();
+    if (editingTitle.trim()) {
+      ChatService.updateSessionTitle(sessionId, editingTitle.trim());
       loadSessions();
+    }
+    setEditingSessionId(null);
+    setEditingTitle("");
+  };
+
+  const handleRenameKeyDown = (e, sessionId) => {
+    if (e.key === 'Enter') {
+      handleSaveRename(e, sessionId);
+    } else if (e.key === 'Escape') {
+      handleCancelRename(e);
     }
   };
 
   const handleDelete = (e, sessionId) => {
     e.stopPropagation();
+    // Note: Using native confirm for now - consider implementing a custom modal in the future
     if (confirm("Are you sure you want to delete this chat?")) {
       ChatService.deleteSession(sessionId);
       loadSessions();
@@ -106,46 +140,83 @@ export default function HistoryPanel() {
           {groupTitle}
         </h3>
         <div className="space-y-1">
-          {sessions.map(session => (
-            <div
-              key={session.id}
-              className={cn(
-                "group relative px-4 py-2 cursor-pointer transition-colors hover:bg-accent",
-                activeSession?.id === session.id && "bg-accent/50"
-              )}
-              onClick={() => handleSessionClick(session.id)}
-              onMouseEnter={() => setHoveredSessionId(session.id)}
-              onMouseLeave={() => setHoveredSessionId(null)}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                  <span className="text-sm truncate">{session.title}</span>
-                </div>
-                
-                {hoveredSessionId === session.id && (
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => handleRename(e, session.id, session.title)}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 hover:bg-destructive hover:text-destructive-foreground"
-                      onClick={(e) => handleDelete(e, session.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+          {sessions.map(session => {
+            const isEditing = editingSessionId === session.id;
+            const isHovered = hoveredSessionId === session.id;
+
+            return (
+              <div
+                key={session.id}
+                className={cn(
+                  "group relative px-4 py-2 transition-colors",
+                  !isEditing && "cursor-pointer hover:bg-accent",
+                  activeSession?.id === session.id && "bg-accent/50"
                 )}
+                onClick={() => handleSessionClick(session.id)}
+                onMouseEnter={() => setHoveredSessionId(session.id)}
+                onMouseLeave={() => setHoveredSessionId(null)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                    
+                    {isEditing ? (
+                      <Input
+                        ref={editInputRef}
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onKeyDown={(e) => handleRenameKeyDown(e, session.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-7 text-sm"
+                      />
+                    ) : (
+                      <span className="text-sm truncate">{session.title}</span>
+                    )}
+                  </div>
+                  
+                  {isEditing ? (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => handleSaveRename(e, session.id)}
+                      >
+                        <Check className="h-3.5 w-3.5 text-green-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={handleCancelRename}
+                      >
+                        <X className="h-3.5 w-3.5 text-red-600" />
+                      </Button>
+                    </div>
+                  ) : isHovered && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => handleStartRename(e, session.id, session.title)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={(e) => handleDelete(e, session.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );

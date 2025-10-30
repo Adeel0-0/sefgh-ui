@@ -129,8 +129,17 @@ const ChatService = {
    * @returns {Object} New ChatSession object
    */
   createNewSession() {
+    // Generate a unique ID using crypto API if available, fallback to timestamp + random
+    let id;
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      id = crypto.randomUUID();
+    } else {
+      // Fallback for environments without crypto.randomUUID
+      id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
     return {
-      id: Date.now().toString(),
+      id,
       title: 'New Chat',
       createdAt: new Date().toISOString(),
       messages: []
