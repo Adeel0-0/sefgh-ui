@@ -34,10 +34,16 @@ const navigationItems = [
 ];
 
 export default function NavPanel() {
-  const { currentView, setCurrentView, isMobileMenuOpen, setIsMobileMenuOpen } = useAppContext();
+  const { currentView, setCurrentView, isMobileMenuOpen, setIsMobileMenuOpen, createNewChat } = useAppContext();
 
   const handleNavigation = (viewId) => {
-    setCurrentView(viewId);
+    // Special handling for "New Chat" - use createNewChat which saves current session
+    if (viewId === "chat") {
+      createNewChat();
+    } else {
+      setCurrentView(viewId);
+    }
+    
     // Close mobile menu on navigation if it's open
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);

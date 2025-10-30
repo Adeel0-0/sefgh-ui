@@ -5,25 +5,15 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChatService from "@/services/chat-service";
+import { useAppContext } from "@/contexts/app-context";
 
 export default function ChatInterface({ onShowRepositories }) {
-  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef(null);
+  const { activeSession, updateActiveSession } = useAppContext();
 
-  // Load chat session on mount
-  useEffect(() => {
-    const loadedMessages = ChatService.loadChatSession();
-    setMessages(loadedMessages);
-  }, []);
-
-  // Save chat session whenever messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      ChatService.saveChatSession(messages);
-    }
-  }, [messages]);
+  const messages = activeSession?.messages || [];
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -33,43 +23,61 @@ export default function ChatInterface({ onShowRepositories }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!inputValue.trim() || isThinking) return;
+    if (!inputValue.trim() || isThinking || !activeSession) return;
 
     const userMessage = inputValue.trim();
     setInputValue("");
 
+    // Check if this is the first message - if so, generate title
+    const isFirstMessage = activeSession.messages.length === 0;
+    
     // Add user message
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    const updatedMessages = [...activeSession.messages, { role: "user", content: userMessage }];
+    
+    // Update session with new message and title if needed
+    const updatedSession = {
+      ...activeSession,
+      messages: updatedMessages,
+      title: isFirstMessage ? ChatService.generateTitle(userMessage) : activeSession.title
+    };
+    
+    updateActiveSession(updatedSession);
     
     // Show thinking indicator
     setIsThinking(true);
-    setMessages(prev => [...prev, { role: "assistant", content: "Thinking..." }]);
+    const withThinking = [...updatedMessages, { role: "assistant", content: "Thinking..." }];
+    updateActiveSession({ ...updatedSession, messages: withThinking });
 
     // Simulate AI response delay
     setTimeout(() => {
-      setMessages(prev => {
-        // Remove thinking message
-        const withoutThinking = prev.slice(0, -1);
-        
-        // Check if user asked about search/find
-        const searchKeywords = ["search", "find", "look for", "show me", "repositories", "repos", "projects"];
-        const isSearchQuery = searchKeywords.some(keyword => 
-          userMessage.toLowerCase().includes(keyword)
-        );
+      // Remove thinking message
+      const withoutThinking = updatedMessages;
+      
+      // Check if user asked about search/find
+      const searchKeywords = ["search", "find", "look for", "show me", "repositories", "repos", "projects"];
+      const isSearchQuery = searchKeywords.some(keyword => 
+        userMessage.toLowerCase().includes(keyword)
+      );
 
-        let responseContent;
-        if (isSearchQuery) {
-          responseContent = "I can help you find GitHub repositories! Click the button below to open the search panel and explore relevant projects.";
-        } else {
-          responseContent = "I understand you're looking for information. If you'd like to search for GitHub repositories, just ask me to 'search' or 'find' something specific!";
-        }
+      let responseContent;
+      if (isSearchQuery) {
+        responseContent = "I can help you find GitHub repositories! Click the button below to open the search panel and explore relevant projects.";
+      } else {
+        responseContent = "I understand you're looking for information. If you'd like to search for GitHub repositories, just ask me to 'search' or 'find' something specific!";
+      }
 
-        return [...withoutThinking, { 
-          role: "assistant", 
-          content: responseContent,
-          showSearchButton: isSearchQuery 
-        }];
-      });
+      const finalMessages = [...withoutThinking, { 
+        role: "assistant", 
+        content: responseContent,
+        showSearchButton: isSearchQuery 
+      }];
+      
+      const finalSession = { ...updatedSession, messages: finalMessages };
+      updateActiveSession(finalSession);
+      
+      // Save session to localStorage after receiving response
+      ChatService.saveSession(finalSession);
+      
       setIsThinking(false);
     }, 1000);
   };

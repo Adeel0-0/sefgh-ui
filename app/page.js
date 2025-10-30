@@ -19,6 +19,7 @@ import { useAppContext } from "@/contexts/app-context";
 import AppHeader from "@/components/core/app-header";
 import NavPanel from "@/components/panels/nav-panel";
 import GitHubSearchPanel from "@/components/panels/github-search-panel";
+import HistoryPanel from "@/components/panels/history-panel";
 import WelcomeView from "@/components/views/welcome-view";
 import ChatView from "@/components/views/chat-view";
 import PlaceholderView from "@/components/views/placeholder-view";
@@ -48,7 +49,7 @@ export default function Home() {
       case "chat":
         return <ChatView onShowRepositories={handleShowRepositories} />;
       case "history":
-        return <PlaceholderView title="History" description="View your chat history" icon={History} />;
+        return <HistoryPanel />;
       case "trending":
         return <PlaceholderView title="Trending" description="Explore trending repositories" icon={TrendingUp} />;
       case "docs":
