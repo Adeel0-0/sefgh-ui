@@ -102,52 +102,27 @@ export default function WelcomeView() {
               <h2 className="text-xl font-semibold">Trending</h2>
             </div>
 
-            {/* River Flow Auto-Scroller */}
-            <div className="relative overflow-hidden rounded-lg">
-              <div className="river-container group">
-                <div className="river-flow">
-                  {/* First set of cards */}
-                  {trendingPrompts.map((item, index) => (
-                    <Card
-                      key={`card-1-${index}`}
-                      className="river-card cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => handleCardClick(item.prompt)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10">
-                            <item.icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-sm mb-1">{item.title}</h3>
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {/* Duplicate set for seamless loop */}
-                  {trendingPrompts.map((item, index) => (
-                    <Card
-                      key={`card-2-${index}`}
-                      className="river-card cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => handleCardClick(item.prompt)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10">
-                            <item.icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-sm mb-1">{item.title}</h3>
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+            {/* Horizontal Trending Cards */}
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+              {trendingPrompts.map((item, index) => (
+                <Card
+                  key={`card-${index}`}
+                  className="flex-shrink-0 w-[280px] cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleCardClick(item.prompt)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <item.icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-sm mb-1">{item.title}</h3>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
@@ -194,45 +169,6 @@ export default function WelcomeView() {
           </form>
         </div>
       </div>
-
-      <style jsx>{`
-        .river-container {
-          position: relative;
-          width: 100%;
-          overflow: hidden;
-        }
-
-        .river-flow {
-          display: flex;
-          gap: 1rem;
-          animation: scroll-left 35s linear infinite;
-        }
-
-        .river-container:hover .river-flow {
-          animation-play-state: paused;
-        }
-
-        .river-card {
-          flex: 0 0 280px;
-          min-width: 280px;
-        }
-
-        @keyframes scroll-left {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-
-        @media (max-width: 768px) {
-          .river-card {
-            flex: 0 0 240px;
-            min-width: 240px;
-          }
-        }
-      `}</style>
     </div>
   );
 }
