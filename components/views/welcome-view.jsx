@@ -165,6 +165,7 @@ export default function WelcomeView() {
                 size="icon"
                 className="flex-shrink-0"
                 title="Add attachment"
+                aria-label="Add attachment"
               >
                 <Plus className="w-5 h-5" />
               </Button>
@@ -175,6 +176,7 @@ export default function WelcomeView() {
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask anything"
                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                aria-label="Ask anything"
               />
 
               {/* Microphone Button */}
@@ -184,6 +186,7 @@ export default function WelcomeView() {
                 size="icon"
                 className="flex-shrink-0"
                 title="Voice input"
+                aria-label="Voice input"
               >
                 <Mic className="w-5 h-5" />
               </Button>
