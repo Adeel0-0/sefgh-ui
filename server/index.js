@@ -32,16 +32,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// TODO: Import and use route handlers
-// import profileRoutes from './routes/profile.routes.js';
-// import chatRoutes from './routes/chat.routes.js';
-// import shareRoutes from './routes/share.routes.js';
-// import settingsRoutes from './routes/settings.routes.js';
+// Import route handlers
+import profileRoutes from './routes/profile.routes.js';
+import chatRoutes from './routes/chat.routes.js';
+import shareRoutes from './routes/share.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
 
-// app.use('/api/profile', profileRoutes);
-// app.use('/api/chats', chatRoutes);
-// app.use('/api/share', shareRoutes);
-// app.use('/api/settings', settingsRoutes);
+// Use route handlers
+app.use('/api/profile', profileRoutes);
+app.use('/api/chats', chatRoutes);
+app.use('/api/share', shareRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
