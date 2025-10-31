@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
-dotenv.config(); // THIS MUST BE THE FIRST OR SECOND LINE
+// Load environment variables immediately, before any other imports
+dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
@@ -9,9 +10,16 @@ import { createClient } from '@supabase/supabase-js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// NOW initialize Supabase, after dotenv has loaded the variables
+// Initialize Supabase client with validation
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Error: SUPABASE_URL and SUPABASE_ANON_KEY must be set in environment variables');
+  console.error('Please check your .env file in the /server directory');
+  process.exit(1);
+}
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
