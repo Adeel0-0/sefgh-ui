@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ export default function ChatInterface({ onShowRepositories }) {
   const messagesEndRef = useRef(null);
   const { activeSession, updateActiveSession } = useAppContext();
 
-  const messages = activeSession?.messages || [];
+  const messages = useMemo(() => activeSession?.messages || [], [activeSession?.messages]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
