@@ -1,20 +1,18 @@
+import dotenv from 'dotenv';
+dotenv.config(); // THIS MUST BE THE FIRST OR SECOND LINE
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
-
-// Load environment variables
-dotenv.config();
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize Supabase client
-export const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_ANON_KEY || ''
-);
+// NOW initialize Supabase, after dotenv has loaded the variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
 app.use(cors({
